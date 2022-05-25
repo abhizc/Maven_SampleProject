@@ -235,9 +235,7 @@ pipeline {
                 checkout scm
                 script {
                     // Get parametrized secrets from the UI
-                    wls_cred[0] = env.wls_cred_dev ?: wls_cred[0]
-                    wls_cred[1] = env.wls_cred_tst ?: wls_cred[1]
-                    wls_cred[2] = env.wls_cred_prd ?: wls_cred[2]
+
                     tgEnviro = env.tgEnviro ?: tgEnviro
                     uiGitTag = env.gitTag
 

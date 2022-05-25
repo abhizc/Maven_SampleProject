@@ -63,18 +63,7 @@ def runDeployProperties(ENV, SRCPATH, TGPATH) {
     srcDirExist = !sh(script: "test -d ${SRCPATH}/${ENV}", returnStatus: true)
     println "Deploying properties files!"
     if (srcDirExist) {
-
-        def remote = [:]
-
-        remote.name = "serveradmin"
-        remote.host = "uv1708.emea.eu.int"
-        remote.allowAnyHosts = true
-        remote.failOnError = true
-        withCredentials([d394389a-5899-45f4-898e-0b18d1ecd24b]) {
-            remote.user = username
-            remote.password = password
-        }
-        sshPut remote: remote, from: SRCPATH, into: TGPATH
+	    println "Exist"
     } else {
         println "Doesnot exist"
     }

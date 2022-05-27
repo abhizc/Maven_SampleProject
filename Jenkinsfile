@@ -52,11 +52,6 @@ def envPat = /ALL|DEV|TST|PRD/
 
 // path to place the properties files on the target servers. The application name, as in artifactId, is automatically appended to this path
 def propsBaseTgtPath = '/temp/'
-// agent to be used
-def agent_dev = 'CT_SLAVE_DEV'
-def agent_tst = 'CT_SLAVE_TEST'
-def agent_prd = 'CT_SLAVE_PROD'
-def agent_ui = 'UI_TEST_HUB'
 
 // -------------------------------- Deploy properties -------------------------------- //
 def runDeployProperties(ENV, SRCPATH, TGPATH) {
@@ -207,7 +202,7 @@ def propsFullTgtPath
 def planPath = ''
 
 pipeline {
-    agent { label "${agent_dev}" }
+    agent Any
     options {
         buildDiscarder(logRotator(numToKeepStr: '3'))
         timestamps()
@@ -382,7 +377,7 @@ pipeline {
         }
         // ---------------------------- Deploy to DEV ---------------------------- //
         stage('Deploy to DEV') {
-            agent any
+            agent Any
             when { expression { tgEnviro == 'ALL' || tgEnviro == 'DEV' } }
             steps {
                 script {
@@ -399,7 +394,7 @@ pipeline {
             }
         }
         stage('Tests in DEV') {
-            agent any
+            agent Any
             when { expression { selenExist && (tgEnviro == 'ALL' || tgEnviro == 'DEV') } }
             steps {
                 runTests(app_url[0], mvnGroupId, depArtifactId, mvnVersion, depArtifactPac, (isRelease || publishSnap))
@@ -420,7 +415,7 @@ pipeline {
             }
         }
         stage('Deploy to TST') {
-            agent { label "${agent_tst}" }
+            agent Any
             when { expression { isRelease && (isMaster || uiGitTag) && (tgEnviro == 'ALL' || tgEnviro == 'TST') } }
             steps {
                 script {
@@ -447,7 +442,7 @@ pipeline {
             }
         }
         stage('Tests in TST') {
-            agent { label "${agent_ui}" }
+            agent Any
             when { expression { isRelease && (isMaster || uiGitTag) && selenExist && (tgEnviro == 'ALL' || tgEnviro == 'TST') } }
             steps {
                 runTests(app_url[1], mvnGroupId, depArtifactId, mvnVersion, depArtifactPac, true)
@@ -467,7 +462,7 @@ pipeline {
             }
         }
         stage('Deploy to PRD') {
-            agent { label "${agent_prd}" }
+            agent Any
             when { expression { isRelease && (isMaster || uiGitTag) && (tgEnviro == 'ALL' || tgEnviro == 'PRD') } }
             steps {
                 script {
@@ -494,7 +489,7 @@ pipeline {
             }
         }
         stage('Tests in PRD') {
-            agent { label "${agent_ui}" }
+            agent Any
             when { expression { isRelease && (isMaster || uiGitTag) && selenExist && (tgEnviro == 'ALL' || tgEnviro == 'PRD') } }
             steps {
                 runTests(app_url[2], mvnGroupId, depArtifactId, mvnVersion, depArtifactPac, true)

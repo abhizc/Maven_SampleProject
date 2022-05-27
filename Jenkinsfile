@@ -78,8 +78,8 @@ def applySecrets(SECRETS, TGPATH) {
             credIDs = sh(script: "sed -nr 's/.*#([0-9a-z]{8}-([0-9a-z]{4}-){3}[0-9a-z]{12}).(user|pwd)#.*/\\1/p' ${mFile} | sort | uniq", returnStdout: true).trim().split('\n')
             for (credID in credIDs) {
                 withCredentials([usernamePassword(credentialsId: "${credID}", usernameVariable: 'WL_USER', passwordVariable: 'WL_PASS')]) {
-                    sh "sed -i 's/#${credID}.user#/${WL_USER}/g' ${mFile}"
-                    sh "sed -i 's/#${credID}.pwd#/${WL_PASS}/g'  ${mFile}"
+                    bat "sed -i 's/#${credID}.user#/${WL_USER}/g' ${mFile}"
+                    bat "sed -i 's/#${credID}.pwd#/${WL_PASS}/g'  ${mFile}"
                 }
             }
         }
@@ -112,11 +112,11 @@ def runDeploy2W(CREDID, URL, GROUPID, ARTIFACTID, VERSION, PACKAGING, DEPLOYFROM
     if (DEPLOYFROMNEXUS) {
         // Get artifact from Nexus
         println "Retrieving artifact from Nexus!"
-        sh "mvn dependency:get -DgroupId=${GROUPID} -DartifactId=${ARTIFACTID} -Dpackaging=${PACKAGING} -Dversion=${VERSION} -Ddest=target/${FINALNAME}.${PACKAGING}"
+        bat "mvn dependency:get -DgroupId=${GROUPID} -DartifactId=${ARTIFACTID} -Dpackaging=${PACKAGING} -Dversion=${VERSION} -Ddest=target/${FINALNAME}.${PACKAGING}"
     } else {
         unstash 'artifacts'
         if (ISMULTIPROJ) {
-            sh "rm -Rf target && mkdir target && cd target && ln -s {../${ARTIFACTID}/target/,}${FINALNAME}.${PACKAGING} && cd .."
+            bat "rm -Rf target && mkdir target && cd target && ln -s {../${ARTIFACTID}/target/,}${FINALNAME}.${PACKAGING} && cd .."
         }
     }
 
@@ -125,7 +125,7 @@ def runDeploy2W(CREDID, URL, GROUPID, ARTIFACTID, VERSION, PACKAGING, DEPLOYFROM
         // Attempt to un-deploy application
         try {
             // First, undeploy the application
-            sh "mvn -nsu -Pdeployment weblogic:undeploy -Dverbose=true -Dfailonerror=false -Duser='${WL_USER}' -Dpassword='${WL_PASS}' -Dname=${NAME} -Dupload=true -Dtargets=${TARGETS} -Dadminurl='${URL}'"
+            bat "mvn -nsu -Pdeployment weblogic:undeploy -Dverbose=true -Dfailonerror=false -Duser='${WL_USER}' -Dpassword='${WL_PASS}' -Dname=${NAME} -Dupload=true -Dtargets=${TARGETS} -Dadminurl='${URL}'"
         } catch (error) {
             println "Error during undeploy: " + error
         }
@@ -133,7 +133,7 @@ def runDeploy2W(CREDID, URL, GROUPID, ARTIFACTID, VERSION, PACKAGING, DEPLOYFROM
         // In case we are using plans
         xtraParams = PLAN ? '-Dplan=' + PLAN : PLAN
         // Deploy to WebLogic
-        sh "mvn -nsu -Pdeployment weblogic:redeploy ${xtraParams} -Dverbose=true -DskipTests=true -Dfailonerror=true -Duser='${WL_USER}' -Dpassword='${WL_PASS}' -Dname=${NAME} -Dupload=true -Dsource=target/${FINALNAME}.${PACKAGING} -Dtargets=${TARGETS} -Dadminurl='${URL}'"
+        bat "mvn -nsu -Pdeployment weblogic:redeploy ${xtraParams} -Dverbose=true -DskipTests=true -Dfailonerror=true -Duser='${WL_USER}' -Dpassword='${WL_PASS}' -Dname=${NAME} -Dupload=true -Dsource=target/${FINALNAME}.${PACKAGING} -Dtargets=${TARGETS} -Dadminurl='${URL}'"
     }
 }
 
@@ -168,14 +168,14 @@ def unitTestsDBparams(mPARAMS) {
 
         switch (pTYPE) {
             case 'string':
-                sh "sed -i 's/^\\(${pMATCH}\\).*/\\1${pREPLAC}/g' ${pFILE}"
+                bat "sed -i 's/^\\(${pMATCH}\\).*/\\1${pREPLAC}/g' ${pFILE}"
                 break
             case 'userCred':
                 usrStr = pMATCH[0]
                 pwdStr = pMATCH[1]
                 withCredentials([usernamePassword(credentialsId: "${pREPLAC}", usernameVariable: 'WL_USER', passwordVariable: 'WL_PASS')]) {
-                    sh "sed -i 's/^\\(${usrStr}\\).*/\\1${WL_USER}/g' ${pFILE}"
-                    sh "sed -i 's/^\\(${pwdStr}\\).*/\\1${WL_PASS}/g' ${pFILE}"
+                    bat "sed -i 's/^\\(${usrStr}\\).*/\\1${WL_USER}/g' ${pFILE}"
+                    bat "sed -i 's/^\\(${pwdStr}\\).*/\\1${WL_PASS}/g' ${pFILE}"
                 }
                 break
             default:
@@ -244,7 +244,7 @@ pipeline {
                         error('The git tag (${uiGitTag}) is not within the expectable patern: d.d.d.d!')
                     } else if (uiGitTag) {
                         println "Retrieving git TAG: ${uiGitTag}"
-                        sh "git checkout tags/${uiGitTag}"
+                        bat "git checkout tags/${uiGitTag}"
                     } else {
                         println "Using latest git commit!"
                     }
@@ -349,9 +349,9 @@ pipeline {
                     // Start the build
                     if (isRelease || publishSnap) {
                         // Build and upload the package to the repo
-                        sh "mvn ${mvn_build_publish_param}"
+                        bat "mvn ${mvn_build_publish_param}"
                     } else {
-                        sh "mvn ${mvn_build_package_param}"
+                        bat "mvn ${mvn_build_package_param}"
 
                         // to use when we don't want to publish
                         stash includes: "**/target/*.ear,**/target/*.war,**/target/*.jar,**/target/*.rar", name: 'artifacts'
@@ -359,7 +359,7 @@ pipeline {
 
                     // Run SonarQube
                     withSonarQubeEnv("${sonarEnv}") {
-                        sh "mvn ${mvn_build_sonar_param}"
+                        bat "mvn ${mvn_build_sonar_param}"
                     }
                 }
             }

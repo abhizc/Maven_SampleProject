@@ -202,7 +202,7 @@ def propsFullTgtPath
 def planPath = ''
 
 pipeline {
-    agent Any
+    agent any
     options {
         buildDiscarder(logRotator(numToKeepStr: '3'))
         timestamps()
@@ -377,7 +377,7 @@ pipeline {
         }
         // ---------------------------- Deploy to DEV ---------------------------- //
         stage('Deploy to DEV') {
-            agent Any
+            agent any
             when { expression { tgEnviro == 'ALL' || tgEnviro == 'DEV' } }
             steps {
                 script {
@@ -394,7 +394,7 @@ pipeline {
             }
         }
         stage('Tests in DEV') {
-            agent Any
+            agent any
             when { expression { selenExist && (tgEnviro == 'ALL' || tgEnviro == 'DEV') } }
             steps {
                 runTests(app_url[0], mvnGroupId, depArtifactId, mvnVersion, depArtifactPac, (isRelease || publishSnap))
@@ -415,7 +415,7 @@ pipeline {
             }
         }
         stage('Deploy to TST') {
-            agent Any
+            agent any
             when { expression { isRelease && (isMaster || uiGitTag) && (tgEnviro == 'ALL' || tgEnviro == 'TST') } }
             steps {
                 script {
@@ -442,7 +442,7 @@ pipeline {
             }
         }
         stage('Tests in TST') {
-            agent Any
+            agent any
             when { expression { isRelease && (isMaster || uiGitTag) && selenExist && (tgEnviro == 'ALL' || tgEnviro == 'TST') } }
             steps {
                 runTests(app_url[1], mvnGroupId, depArtifactId, mvnVersion, depArtifactPac, true)
@@ -462,7 +462,7 @@ pipeline {
             }
         }
         stage('Deploy to PRD') {
-            agent Any
+            agent any
             when { expression { isRelease && (isMaster || uiGitTag) && (tgEnviro == 'ALL' || tgEnviro == 'PRD') } }
             steps {
                 script {
@@ -489,7 +489,7 @@ pipeline {
             }
         }
         stage('Tests in PRD') {
-            agent Any
+            agent any
             when { expression { isRelease && (isMaster || uiGitTag) && selenExist && (tgEnviro == 'ALL' || tgEnviro == 'PRD') } }
             steps {
                 runTests(app_url[2], mvnGroupId, depArtifactId, mvnVersion, depArtifactPac, true)

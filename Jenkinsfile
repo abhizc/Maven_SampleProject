@@ -209,6 +209,10 @@ pipeline {
         skipDefaultCheckout()
     }
 
+	tools { 
+      maven 'Maven_385' 
+    }
+
     parameters {
         booleanParam(name: "isRelease", description: "Release", defaultValue: false)
         string(name: 'releaseVersion', defaultValue: 'X.X.X.X', description: 'Fill in your release version')

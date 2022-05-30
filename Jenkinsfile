@@ -1,21 +1,28 @@
 pipeline {
     agent any
     tools {
-        maven "Maven_385"
+        "Maven_385"
+        jdk 'jdk8'
     }
     stages {
-        stage('Initialize'){
-            steps{
-                echo "PATH = ${M2_HOME}/bin:${PATH}"
-                echo "M2_HOME = /opt/maven"
+        stage ('Initialize') {
+            steps {
+                sh '''
+                    echo "PATH = ${PATH}"
+                    echo "M2_HOME = ${M2_HOME}"
+                '''
             }
         }
-        stage('Build') {
+
+        stage ('Build') {
             steps {
-                script {
-                sh 'mvn -B -DskipTests clean package'
+                sh 'mvn -Dmaven.test.failure.ignore=true install' 
+            }
+            post {
+                success {
+                    junit 'target/surefire-reports/**/*.xml' 
                 }
             }
         }
-     }
+    }
 }

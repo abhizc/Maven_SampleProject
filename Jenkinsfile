@@ -1,26 +1,20 @@
 pipeline {
     agent any
-    tools {
-        maven 'Maven_385'
-    }
     stages {
-        stage ('Initialize') {
+        stage ('First') {
             steps {
-                sh '''
-                    echo "PATH"
-                    echo "M2_HOME"
-                '''
-            }
-        }
-
-        stage ('Build') {
-            steps {
-                sh 'mvn -Dmaven.test.failure.ignore=true install' 
-            }
-            post {
-                success {
-                    junit 'target/surefire-reports/**/*.xml' 
-                }
+                
+                remote = [:]
+                remote.name = "uv1708.emea.eu.int"
+                remote.host = "uv1708.emea.eu.int"
+                remote.allowAnyHosts = true
+                remote.failOnError = true
+                withCredentials([usernamePassword(credentialsId: '798ecc2e-d05f-443a-9a04-83fbeb3a37a5', passwordVariable: '0hZXV8S1', usernameVariable: 'serveradmin')]) {
+                    remote.user = username
+                    remote.password = password
+                    }
+                sshPut remote: remote, from: 'myfile', into: 'depoyment-temp\'
+                
             }
         }
     }

@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage ('First') {
             steps {
-                
+                sh 'pwd'
                 remote = [:]
                 remote.name = "uv1708.emea.eu.int"
                 remote.host = "uv1708.emea.eu.int"
@@ -13,7 +13,7 @@ pipeline {
                     remote.user = username
                     remote.password = password
                     }
-                sshPut remote: remote, from: 'myfile', into: 'depoyment-temp\'
+                sshPut remote: remote, from: 'myfile', into: '/home/serveradmin/'
                 
             }
         }

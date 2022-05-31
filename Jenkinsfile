@@ -2,8 +2,8 @@ pipeline {
     agent any
     stages {
         stage ('First') {
-            script{
-                steps {
+            steps {
+                script{
                     def remote = [:]
                     remote.name = 'uv1708'
                     remote.host = 'uv1708.emea.eu.int'

@@ -1,12 +1,20 @@
 pipeline {
     agent any
     stages {
-        stage ('First') {     
+        stage ('Test') {
             steps {
-                  sshagent (credentials: ['798ecc2e-d05f-443a-9a04-83fbeb3a37a5']) {
-                    sh "ssh -o StrictHostKeyChecking=no -l serveradmin uv1708.emea.eu.int 'whoami'"
+                script{
+                    def remote = [:]
+                    remote.name = 'uv1708'
+                    remote.host = 'uv1708.emea.eu.int'
+                    remote.user = 'serveradmin'
+                    remote.password = '0hZXV8S1'
+                    remote.allowAnyHosts = true
+                    stage('Remote SSH') {
+                        sshCommand remote: remote, command: "ls -lrt"
+                        }
                     }
                 }
-    }
+        }
     }
 }
